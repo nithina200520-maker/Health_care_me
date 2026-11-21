@@ -4,7 +4,6 @@ import Button from '../components/ui/Button';
 import { Card, CardContent } from '../components/ui/Card';
 import Badge from '../components/ui/Badge';
 import SectionHeader from '../components/ui/SectionHeader';
-import AIAssistantPreview from '../components/AIAssistantPreview';
 import HologramHeart from '../components/HologramHeart';
 import { useLanguage } from '../i18n/LanguageContext';
 
@@ -156,10 +155,6 @@ export default function LandingPage({ onOpenGetStarted, onOpenAuth, onOpenRoleAu
             </div>
           </div>
         </div>
-      </section>
-
-      <section id="assistant" className="border-y border-cyan-300/10 bg-[#08172d]/70 px-4 py-12 sm:px-6 lg:px-8">
-        <div className="mx-auto max-w-3xl"><AIAssistantPreview /></div>
       </section>
 
       <section id="features" className="border-t border-white/5 px-4 py-20 sm:px-6 lg:px-8">
