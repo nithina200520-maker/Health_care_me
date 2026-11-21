@@ -9,7 +9,7 @@
     "dev:backend": "node backend/server.js",
     "build": "vite build --configLoader runner",
     "preview": "vite preview --configLoader runner",
-    "test": "node --test backend/phase4.test.js"
+    "test": "node --test backend/phase4.test.js backend/phase5.test.js"
   },
   "dependencies": {
     "lucide-react": "^0.475.0",

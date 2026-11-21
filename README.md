@@ -23,7 +23,7 @@ CareBridge AI is a patient-centric healthcare workflow coordination platform des
 - 11-stage diagnostic lifecycle from `Requested` ➔ `Sample Collected` / `Scan Scheduled` ➔ `Processing` ➔ `Report Generated` ➔ `Doctor Reviewed`.
 - SLA waiting-time delay indicators and department-level work queues.
 
-### Phase 4 — Smart Patient Prioritization & Critical Case Escalation (Completed)
+### Phase 4 — Smart Patient Prioritization & Critical Case Escalation
 1. **Smart Patient Prioritization**:
    - Urgent, Moderate, and Routine clinician-entered priority categories.
    - Doctor-role restricted priority assessments requiring explicit clinical justifications.
@@ -46,7 +46,29 @@ CareBridge AI is a patient-centric healthcare workflow coordination platform des
 7. **Architectural Improvements**:
    - Reusable `Sidebar` layout component.
    - Extracted `PatientPriorityDetails` component.
-   - Node.js in-memory REST API with 8 passing automated unit tests.
+
+### Phase 5 — CareBridge AI Smart Assistant, Medical Image Analysis & Voice Integration (Completed)
+1. **Floating AI Assistant**:
+   - Floating interactive assistant button across the entire platform with pulsing holographic glow and online status indicator.
+   - Expandable, draggable chat drawer with 3D-styled AI avatar, message history, suggested questions, and minimize/close controls.
+2. **Medical Image & Document Upload**:
+   - Drag-and-drop & file browser supporting JPG, JPEG, PNG, and PDF (up to 10MB).
+   - Real-time thumbnail preview, file validation, progress state, and replace/remove controls.
+   - Explicit user consent check acknowledging non-diagnostic informational use before processing.
+3. **AI Document & Image Analysis**:
+   - Structured parameter and value extraction for laboratory blood reports (CBC, glucose, creatinine, etc.).
+   - Prescription extraction parsing medication names, dosing schedules, and consumption instructions.
+   - Plain-language patient explanation, medical terminology definitions, and recommended questions to ask treating clinicians.
+   - **Strict Clinical Guardrail**: Medical scans (CT, MRI, X-ray) are strictly prohibited from receiving autonomous AI diagnosis, displaying mandatory notices directing patients to certified radiologists.
+4. **Multilingual Voice Assistant**:
+   - Text-to-speech engine supporting spoken replies in **English**, **Kannada (`kn`)**, and **Hindi (`hi`)**.
+   - Integrated playback controls: Play, Pause, Replay, and Stop.
+   - Speech-to-text voice input via microphone for conversational question asking.
+5. **Smart Healthcare Navigation**:
+   - Direct patient assistance for checking doctor availability, lab investigation tracking status, and CT/MRI schedule milestones.
+6. **Backend & Test Suite**:
+   - REST endpoints: `POST /api/phase5/chat`, `POST /api/phase5/analyze-document`, `GET /api/phase5/navigation`.
+   - 15 total unit tests passing across Phase 4 and Phase 5 (`npm test`).
 
 ---
 
@@ -61,8 +83,8 @@ CareBridge AI is a patient-centric healthcare workflow coordination platform des
 ## Technology Stack
 
 - **Frontend**: React 18, Vite 6, Tailwind CSS 3, Lucide React icons
-- **Backend**: Node.js HTTP Server (`backend/server.js`), REST endpoints under `/api/phase4/*`
-- **Testing**: Node.js native test runner (`node --test backend/phase4.test.js`)
+- **Backend**: Node.js HTTP Server (`backend/server.js`), REST endpoints under `/api/phase4/*` and `/api/phase5/*`
+- **Testing**: Node.js native test runner (`node --test backend/phase4.test.js backend/phase5.test.js`) — 15 passing tests
 
 ---
 
@@ -86,7 +108,7 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser. All `/a
   ```
 
 ### 3. Automated Tests & Build
-- **Run Backend Tests**:
+- **Run Backend Tests (15 tests)**:
   ```sh
   npm test
   ```
@@ -107,17 +129,19 @@ src/
     triage/         Phase 2 symptom check-in and staff review queue
     investigations/ Phase 3 investigation lifecycle and delay tracking
     priority/       Phase 4 priority queues, details, alerts, and doctor availability
+    assistant/      Phase 5 FloatingAssistant, VoiceControls, ImageUploadZone, DocumentAnalysisCard
   layouts/          Navbar, Footer, and Sidebar layouts
   pages/            LandingPage and role-based DashboardApp
-  services/         API client for Phase 4 endpoints
+  services/         API client for Phase 4 & Phase 5 endpoints
   styles/           Tailwind CSS configuration and design tokens
-  i18n/             LanguageContext and Kannada translation dictionary
+  i18n/             LanguageContext, English, Kannada, and Hindi translation dictionaries
   utils/            Theme constants and clinical triage rules
 backend/
-  server.js         HTTP server with reverse-proxy support
+  server.js         HTTP server with reverse-proxy support (Phase 4 & Phase 5)
   models/           In-memory priority store, demo records, and wait calculators
-  services/         Business logic, escalation engine, and role validation
-  controllers/      API route controllers
-  routes/           REST router (/api/health, /api/phase4/*)
-  phase4.test.js    Automated test suite (8 tests)
+  services/         Business logic, escalation engine, assistant service, and role validation
+  controllers/      API route controllers (Priority & AI Assistant)
+  routes/           REST router (/api/health, /api/phase4/*, /api/phase5/*)
+  phase4.test.js    Automated test suite for Phase 4 (8 tests)
+  phase5.test.js    Automated test suite for Phase 5 (7 tests)
 ```

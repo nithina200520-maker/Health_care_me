@@ -258,9 +258,13 @@ function NotificationCenter({ notifications, onMarkRead, onMarkAllRead }) {
   return <Card><CardHeader><div className="flex items-center justify-between gap-3"><div><CardTitle>Notification Center</CardTitle><p className="mt-1 text-sm text-text-muted">{t('Local demonstration notifications from this session.')}</p></div><Button size="sm" variant="ghost" onClick={onMarkAllRead}>Mark all read</Button></div></CardHeader><CardContent className="space-y-2 pt-0">{notifications.length ? notifications.map((item) => <button key={item.id} onClick={() => onMarkRead(item.id)} className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${item.read ? 'border-white/5 bg-transparent' : 'border-cyan-300/10 bg-cyan-300/[0.035]'}`}><span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${item.read ? 'bg-text-muted/40' : item.severity === 'Immediate Attention' ? 'bg-health-error' : item.severity === 'Urgent Review' ? 'bg-health-warning' : 'bg-accent-cyan'}`} /><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-white">{t(item.title)}</span><Badge variant={tone(item.severity)} size="sm">{item.severity}</Badge></span><span className="mt-1 block text-xs text-text-secondary">{t('Patient ID')}: {item.patientId}</span><span className="mt-1 block text-xs text-text-muted">{new Date(item.time).toLocaleString(language === 'kn' ? 'kn-IN' : 'en-IN')}</span></span><span className="text-xs text-text-muted">{t(item.read ? 'Read' : 'Unread')}</span></button>) : <p className="py-8 text-center text-sm text-text-muted">{t('No symptom check-in notifications in this session.')}</p>}</CardContent></Card>;
 }
 
-export default function DashboardApp({ onExitDemo }) {
+export default function DashboardApp({ onExitDemo, initialSection }) {
   const [role, setRole] = useState('Patient');
-  const [section, setSection] = useState('Dashboard');
+  const [section, setSection] = useState(initialSection || 'Dashboard');
+
+  React.useEffect(() => {
+    if (initialSection) setSection(initialSection);
+  }, [initialSection]);
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [roleOpen, setRoleOpen] = useState(false);
@@ -344,7 +348,7 @@ export default function DashboardApp({ onExitDemo }) {
                 : activeSection === 'Symptom Check-In' ? <SymptomCheckIn onSubmit={handleSymptomSubmit} latestCheckIn={role === 'Patient' ? latestPatientCheckIn : null} defaults={role === 'Patient' ? { patientId: 'CB-2050', patientName: 'Ananya Rao', age: 29, gender: 'Female' } : {}} />
                   : activeSection === 'Notifications' ? <NotificationCenter notifications={demoNotifications} onMarkRead={markNotificationRead} onMarkAllRead={markAllNotificationsRead} />
                     : <GenericSection section={activeSection} role={role} search={search} onAction={notify} investigations={investigations} onStatusChange={updateInvestigationStatus} />}
-        <p className="mt-8 border-t border-white/5 pt-4 text-center text-xs text-text-muted">CareBridge AI Phase 4 UI demo · {t('Sample data only')} · {t('Not for clinical use')}</p>
+        <p className="mt-8 border-t border-white/5 pt-4 text-center text-xs text-text-muted">CareBridge AI Phase 5 UI demo · {t('Sample data only')} · {t('Not for clinical use')}</p>
       </main>
     </div>
   </div>;

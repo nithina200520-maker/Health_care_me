@@ -33,3 +33,13 @@ export const createEmergencyEscalation = (id, body, role) => request(`/phase4/ca
 export const acknowledgeCriticalAlert = (id, body, role) => request(`/phase4/alerts/${encodeURIComponent(id)}/acknowledge`, { role, method: 'PATCH', body: jsonBody(body) });
 export const updateEmergencyEscalation = (id, body, role) => request(`/phase4/escalations/${encodeURIComponent(id)}/status`, { role, method: 'PATCH', body: jsonBody(body) });
 export const updateDoctorAvailability = (id, body, role) => request(`/phase4/doctors/${encodeURIComponent(id)}/availability`, { role, method: 'PATCH', body: jsonBody(body) });
+
+// Phase 5 Smart Assistant & Document Analysis
+export const sendChatMessage = ({ message, history, language = 'en', role = 'Patient' }) =>
+  request('/phase5/chat', { role, method: 'POST', body: jsonBody({ message, history, language }) });
+
+export const analyzeMedicalDocument = ({ fileData, fileName, fileType, language = 'en', role = 'Patient' }) =>
+  request('/phase5/analyze-document', { role, method: 'POST', body: jsonBody({ fileData, fileName, fileType, language }) });
+
+export const getHospitalNavigation = (language = 'en') =>
+  request(`/phase5/navigation?lang=${encodeURIComponent(language)}`);

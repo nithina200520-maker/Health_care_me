@@ -1,3 +1,5 @@
+import { createAssistantService } from './assistantService.js';
+
 export const PRIORITIES = ['Urgent', 'Moderate', 'Routine'];
 export const STAFF_ROLES = ['Doctor', 'Hospital Staff', 'Hospital Administrator'];
 export const ALL_DEMO_ROLES = ['Patient', ...STAFF_ROLES, 'Laboratory Staff', 'Radiology Staff'];
@@ -29,6 +31,7 @@ const pushHistory = (item, event) => {
 
 export function createPriorityService(store) {
   const time = () => new Date(store.now()).toISOString();
+  const assistant = createAssistantService(store);
   const getCase = (id) => {
     const item = store.cases.find((entry) => entry.id === id);
     if (!item) throw new ServiceError(404, 'Patient priority case not found.');
@@ -211,5 +214,16 @@ export function createPriorityService(store) {
       log(item, 'escalation-status', `Escalation status: ${status}.`, actor);
       return { ...entry, history: [...entry.history] };
     },
+    chat(body, role) {
+      return assistant.handleChat({ ...body, role });
+    },
+    analyzeDocument(body, role) {
+      return assistant.analyzeDocument({ ...body, role });
+    },
+    navigation(language) {
+      return assistant.getNavigationSummary(language);
+    },
   };
 }
+
+export { createAssistantService };

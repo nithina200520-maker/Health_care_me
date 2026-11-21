@@ -6,7 +6,7 @@ import { createPriorityStore } from './models/index.js';
 import { createPriorityRouter } from './routes/index.js';
 import { createPriorityService, ServiceError } from './services/index.js';
 
-const MAX_BODY_BYTES = 1024 * 1024;
+const MAX_BODY_BYTES = 10 * 1024 * 1024;
 
 async function readJson(request) {
   const chunks = [];
@@ -40,14 +40,20 @@ export function createCareBridgeServer({ store = createPriorityStore() } = {}) {
 
     const url = new URL(request.url || '/', 'http://127.0.0.1');
     if (request.method === 'GET' && url.pathname === '/api/health') {
-      send(response, 200, { status: 'ok', service: 'CareBridge AI Demo API', version: '0.2.0', phase: 'Phase 4', storage: 'in-memory demo data', timestamp: new Date().toISOString() });
+      send(response, 200, { status: 'ok', service: 'CareBridge AI Demo API', version: '0.3.0', phase: 'Phase 4', activePhases: ['Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4', 'Phase 5'], storage: 'in-memory demo data', timestamp: new Date().toISOString() });
       return;
     }
-    if (!url.pathname.startsWith('/api/phase4')) { send(response, 404, { error: 'Route not found.' }); return; }
+    if (!url.pathname.startsWith('/api/phase4') && !url.pathname.startsWith('/api/phase5')) {
+      send(response, 404, { error: 'Route not found.' });
+      return;
+    }
 
     try {
       const body = ['POST', 'PATCH', 'PUT'].includes(request.method) ? await readJson(request) : {};
-      const path = url.pathname.slice('/api/phase4'.length) || '/';
+      const prefix = url.pathname.startsWith('/api/phase5') ? '/api/phase5' : '/api/phase4';
+      const path = url.pathname.slice(prefix.length) || '/';
+      const queryLang = url.searchParams.get('lang');
+      if (queryLang) body.lang = queryLang;
       const result = await router({ method: request.method, path, body, role: request.headers['x-demo-role'], patientId: request.headers['x-demo-patient-id'] || 'CB-2050' });
       send(response, result.status, result.body);
     } catch (error) {
@@ -62,7 +68,7 @@ export function createCareBridgeServer({ store = createPriorityStore() } = {}) {
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const port = Number(process.env.PORT || 5000);
   createCareBridgeServer().listen(port, '127.0.0.1', () => {
-    console.log(`[CareBridge AI] Phase 4 demo API listening at http://127.0.0.1:${port}`);
+    console.log(`[CareBridge AI] Phase 4 & Phase 5 demo API listening at http://127.0.0.1:${port}`);
   });
 }
 

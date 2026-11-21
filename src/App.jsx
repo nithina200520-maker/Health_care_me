@@ -6,6 +6,7 @@ import AuthModal from './components/AuthModal';
 import { ToastProvider } from './components/ui/Toast';
 import DashboardApp from './pages/DashboardApp';
 import { LanguageProvider } from './i18n/LanguageContext';
+import FloatingAssistant from './components/assistant/FloatingAssistant';
 
 export default function App() {
   const [authModalState, setAuthModalState] = useState({
@@ -13,6 +14,7 @@ export default function App() {
     mode: 'signup',
   });
   const [showDashboard, setShowDashboard] = useState(false);
+  const [targetDashboardSection, setTargetDashboardSection] = useState('Dashboard');
 
   const openSignUp = () => {
     setShowDashboard(true);
@@ -26,12 +28,22 @@ export default function App() {
     setAuthModalState((prev) => ({ ...prev, isOpen: false }));
   };
 
+  const handleAssistantNavigation = (section) => {
+    setShowDashboard(true);
+    if (section) {
+      setTargetDashboardSection(section);
+    }
+  };
+
   return (
     <ToastProvider>
       <LanguageProvider>
       <div className="min-h-screen bg-[#07111F] text-[#F8FAFC] flex flex-col font-sans selection:bg-[#00D4FF]/20 selection:text-[#00D4FF]">
         {showDashboard ? (
-          <DashboardApp onExitDemo={() => setShowDashboard(false)} />
+          <DashboardApp
+            initialSection={targetDashboardSection}
+            onExitDemo={() => setShowDashboard(false)}
+          />
         ) : (
           <>
             <Navbar onOpenAuth={openLogin} onOpenGetStarted={openSignUp} />
@@ -41,6 +53,9 @@ export default function App() {
             <Footer />
           </>
         )}
+
+        {/* Floating CareBridge AI Assistant (Phase 5) */}
+        <FloatingAssistant onNavigateSection={handleAssistantNavigation} />
 
         {/* Interactive Auth/Onboarding Modal */}
         <AuthModal

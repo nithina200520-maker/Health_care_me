@@ -9,5 +9,8 @@ export function createPriorityController(service) {
     acknowledgeAlert: (id, body, role) => service.acknowledgeAlert(id, body, role),
     updateEscalation: (id, body, role) => service.updateEscalation(id, body, role),
     updateDoctorAvailability: (id, body, role) => service.updateDoctorAvailability(id, body, role),
+    chat: (body, role) => service.chat(body, role),
+    analyzeDocument: (body, role) => service.analyzeDocument(body, role),
+    navigation: (language) => service.navigation(language),
   };
 }

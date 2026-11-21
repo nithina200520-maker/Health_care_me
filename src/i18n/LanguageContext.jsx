@@ -566,14 +566,103 @@ const translations = {
   'Clinician Priority Assessment': 'ವೈದ್ಯರ ಆದ್ಯತೆ ಮೌಲ್ಯಮಾಪನ',
   'Emergency Escalation': 'ತುರ್ತು ಪ್ರಕರಣ ಹಂತ ಹೆಚ್ಚಳ',
   'Create Escalation': 'ತುರ್ತು ಎಚ್ಚರಿಕೆಯನ್ನು ಕಳುಹಿಸಿ',
+  'AI Medical Assistant': 'AI ವೈದ್ಯಕೀಯ ಸಹಾಯಕ',
+  'Upload Medical Document': 'ವೈದ್ಯಕೀಯ ದಾಖಲೆ ಅಪ್‌ಲೋಡ್ ಮಾಡಿ',
+  'Drag and drop medical report or prescription': 'ವರದಿ ಅಥವಾ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಎಳೆದು ಬಿಡಿ',
+  'Supports JPG, PNG, PDF': 'JPG, PNG, PDF ಫಾರ್ಮ್ಯಾಟ್‌ಗಳು ಲಭ್ಯ',
+  'Analyze Document': 'ದಾಖಲೆ ವಿಶ್ಲೇಷಿಸಿ',
+  'Analyzing document...': 'ದಾಖಲೆಯನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...',
+  'Extracted Findings': 'ಗುರುತಿಸಲಾದ ಫಲಿತಾಂಶಗಳು',
+  'Plain-Language Explanation': 'ಸರಳ ಭಾಷೆಯ ವಿವರಣೆ',
+  'Questions for Your Doctor': 'ನಿಮ್ಮ ವೈದ್ಯರನ್ನು ಕೇಳಬೇಕಾದ ಪ್ರಶ್ನೆಗಳು',
+  'Voice Response': 'ಧ್ವನಿ ಪ್ರತಿಕ್ರಿಯೆ',
+  'Listen': 'ಆಲಿಸಿ',
+  'Pause': 'ವಿರಾಮ',
+  'Replay': 'ಮತ್ತೊಮ್ಮೆ ಪ್ಲೇ ಮಾಡಿ',
+  'Voice Input': 'ಧ್ವನಿ ಇನ್‌ಪುಟ್',
+  'Listening...': 'ಆಲಿಸಲಾಗುತ್ತಿದೆ...',
+  'Send message': 'ಸಂದೇಶ ಕಳುಹಿಸಿ',
+  'Ask a health question...': 'ಆರೋಗ್ಯ ಸಂಬಂಧಿ ಪ್ರಶ್ನೆ ಕೇಳಿ...',
+  'Hospital Navigation': 'ಆಸ್ಪತ್ರೆ ಮಾರ್ಗದರ್ಶನ',
+};
+
+const hindiTranslations = {
+  'CareBridge AI': 'केयरब्रिज एआई',
+  'HealthTech': 'हेल्थटेक',
+  'Home': 'होम',
+  'How It Works': 'यह कैसे काम करता है',
+  'Features': 'विशेषताएं',
+  'About': 'हमारे बारे में',
+  'Contact': 'संपर्क',
+  'Login': 'लॉगिन',
+  'Get Started': 'शुरू करें',
+  'Explore Platform': 'प्लेटफ़ॉर्म देखें',
+  'Connecting Patients to Timely Healthcare.': 'मरीजों को समय पर स्वास्थ्य सेवा से जोड़ना।',
+  'Smarter healthcare coordination that helps patients track diagnostic tests, reduce waiting uncertainty and connect with the right medical teams.': 'स्मार्ट स्वास्थ्य समन्वय जो मरीजों को जांच ट्रैक करने, प्रतीक्षा अनिश्चितता कम करने और सही मेडिकल टीम से जुड़ने में मदद करता है।',
+  'CareBridge AI Assistant': 'केयरब्रिज एआई सहायक',
+  'AI Medical Assistant': 'एआई मेडिकल सहायक',
+  'Ask about prescriptions, lab reports, doctor appointments...': 'प्रिस्क्रिप्शन, लैब रिपोर्ट, डॉक्टर अपॉइंटमेंट के बारे में पूछें...',
+  'Upload Medical Document': 'मेडिकल दस्तावेज़ अपलोड करें',
+  'Drag and drop medical report or prescription': 'मेडिकल रिपोर्ट या प्रिस्क्रिप्शन खींचकर छोड़ें',
+  'Supports JPG, PNG, PDF': 'JPG, PNG, PDF समर्थित हैं',
+  'Analyze Document': 'दस्तावेज़ का विश्लेषण करें',
+  'Analyzing document...': 'दस्तावेज़ का विश्लेषण हो रहा है...',
+  'Extracted Findings': 'निकाले गए निष्कर्ष',
+  'Plain-Language Explanation': 'सरल भाषा में व्याख्या',
+  'Questions for Your Doctor': 'डॉक्टर से पूछने योग्य सवाल',
+  'Voice Response': 'ऑडियो आवाज़ प्रतिक्रिया',
+  'Listen': 'सुनें',
+  'Pause': 'रोकें',
+  'Replay': 'पुनः चलाएं',
+  'Voice Input': 'आवाज़ इनपुट',
+  'Listening...': 'सुन रहे हैं...',
+  'Send message': 'संदेश भेजें',
+  'Ask a health question...': 'स्वास्थ्य से जुड़ा प्रश्न पूछें...',
+  'Hospital Navigation': 'अस्पताल नेविगेशन',
+  'Patient Priority Dashboard': 'मरीज प्राथमिकता डैशबोर्ड',
+  'Critical Alerts Panel': 'महत्वपूर्ण अलर्ट पैनल',
+  'Waiting-Time Analytics': 'प्रतीक्षा समय विश्लेषण',
+  'Emergency Escalation Timeline': 'आपातकालीन एस्केलेशन समयरेखा',
+  'Doctor Availability & Schedules': 'डॉक्टर की उपलब्धता व अनुसूची',
+  'My Consultation Priority & Queue Status': 'मेरी परामर्श प्राथमिकता व कतार स्थिति',
+  'View priority details': 'प्राथमिकता विवरण देखें',
+  'Immediate Attention Bottlenecks': 'तत्काल ध्यान देने योग्य विलंब',
+  'Department Waiting Breakdown': 'विभागवार प्रतीक्षा विश्लेषण',
+  'Clinician Priority Assessment': 'चिकित्सक प्राथमिकता मूल्यांकन',
+  'Emergency Escalation': 'आपातकालीन एस्केलेशन',
+  'Create Escalation': 'एस्केलेशन बनाएं',
+  'Urgent': 'अति-आवश्यक',
+  'Moderate': 'मध्यम',
+  'Routine': 'सामान्य',
+  'Available': 'उपलब्ध',
+  'In consultation': 'परामर्श में',
+  'On rounds': 'राउंड पर',
+  'Off duty': 'ड्यूटी समाप्त',
+  'Doctor': 'डॉक्टर',
+  'Patient': 'मरीज',
+  'Hospital Staff': 'अस्पताल स्टाफ',
+  'Laboratory Staff': 'प्रयोगशाला स्टाफ',
+  'Radiology Staff': 'रेडियोलॉजी स्टाफ',
+  'Hospital Administrator': 'अस्पताल प्रशासक',
+  'Investigation Tracking': 'जांच ट्रैकिंग',
+  'Dashboard': 'डैशबोर्ड',
+  'Symptom Check-In': 'लक्षण चेक-इन',
+  'Notifications': 'सूचनाएं',
+  'Settings': 'सेटिंग्स',
+  'Safety notice:': 'सुरक्षा सूचना:',
+  'This tool provides non-diagnostic text extraction and patient explanations only. It does not replace clinical evaluation by a licensed physician.': 'यह उपकरण केवल गैर-निदानात्मक पाठ निष्कर्षण और मरीजों की समझ के लिए है। यह चिकित्सक की जांच का विकल्प नहीं है।',
 };
 
 const LanguageContext = createContext(null);
 
 export function LanguageProvider({ children }) {
   const [language, setLanguage] = useState(() => {
-    try { return localStorage.getItem('carebridge-language') === 'kn' ? 'kn' : 'en'; }
-    catch { return 'en'; }
+    try {
+      const saved = localStorage.getItem('carebridge-language');
+      return ['en', 'kn', 'hi'].includes(saved) ? saved : 'en';
+    } catch {
+      return 'en';
+    }
   });
 
   useEffect(() => {
@@ -584,7 +673,11 @@ export function LanguageProvider({ children }) {
   const value = useMemo(() => ({
     language,
     setLanguage,
-    t: (text) => language === 'kn' ? translations[text] || text : text,
+    t: (text) => {
+      if (language === 'kn') return translations[text] || text;
+      if (language === 'hi') return hindiTranslations[text] || text;
+      return text;
+    },
   }), [language]);
   return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 }
@@ -595,3 +688,4 @@ export function useLanguage() {
 }
 
 export const languageTranslations = translations;
+export const hindiLanguageTranslations = hindiTranslations;
