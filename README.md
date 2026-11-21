@@ -1,0 +1,123 @@
+# CareBridge AI – Smart Healthcare Coordination & Patient Assistance Platform
+
+CareBridge AI is a patient-centric healthcare workflow coordination platform designed to address critical delays in government and public hospitals: delayed diagnoses, diagnostic test bottlenecks (CT/MRI/blood tests), delayed doctor consultations, and poor departmental coordination.
+
+---
+
+## Current Scope & Completed Phases
+
+### Phase 0 — Design System & Platform Foundation
+- **Visual Design System**: Deep Navy theme (`#07111F`, `#0B1728`, `#101F33`, `#142842`), Cyan (`#00D4FF`) and Blue (`#3478F6`) accents, and accessible status colors (`#22C55E`, `#F59E0B`, `#EF4444`).
+- **Reusable UI Library**: Button, Card, Input, Badge, Modal, SectionHeader, LoadingSpinner, Toast, EmptyState, and StatusIndicator.
+- **Responsive Landing Page**: Interactive 3D Holographic Heart, 6 Core Architecture Feature Cards, 6-Stage Hospital Workflow, and Medical Disclaimer.
+
+### Phase 1 — Multi-Role Architecture & Kannada Localization
+- **6 Supported Roles**: Patient, Doctor, Hospital Staff, Laboratory Staff, Radiology Staff, and Hospital Administrator.
+- **Language Support**: Comprehensive i18n support for English and Kannada (`kn`).
+
+### Phase 2 — Symptom Check-In & Local Staff Triage
+- Patient symptom entry with severity, duration, and red-flag emergency warning signs.
+- Staff triage review queue with priority override audit log and clinical notes.
+
+### Phase 3 — Investigation Lifecycle & Delay Monitoring
+- 11-stage diagnostic lifecycle from `Requested` ➔ `Sample Collected` / `Scan Scheduled` ➔ `Processing` ➔ `Report Generated` ➔ `Doctor Reviewed`.
+- SLA waiting-time delay indicators and department-level work queues.
+
+### Phase 4 — Smart Patient Prioritization & Critical Case Escalation (Completed)
+1. **Smart Patient Prioritization**:
+   - Urgent, Moderate, and Routine clinician-entered priority categories.
+   - Doctor-role restricted priority assessments requiring explicit clinical justifications.
+   - Comprehensive priority history and audit logging.
+2. **Critical Case Alerts Panel**:
+   - Automated alerts for time-sensitive cases and patient-reported red flags.
+   - Multi-role notification targeting and acknowledgement tracking.
+3. **Waiting-Time Analytics**:
+   - Real-time elapsed wait tracking vs. expected limit (30 minutes default threshold).
+   - Department waiting breakdown with bottleneck visual indicators.
+   - Separate consultation delay vs. diagnostic test delay metrics.
+4. **Emergency Escalation Timeline**:
+   - Full 4-stage escalation lifecycle: `Pending acknowledgement` ➔ `Acknowledged` ➔ `Responded` ➔ `Resolved`.
+   - Multi-recipient routing to Doctors, Hospital Staff, and Hospital Administrators.
+5. **Interactive Doctor Availability & Schedules**:
+   - Real-time availability toggling (`Available`, `In consultation`, `On rounds`, `Off duty`).
+   - Active pending consultation workload balancing and shift tracking.
+6. **Patient-Facing Queue Visibility**:
+   - Safe, transparent queue status, estimated wait time, and assigned clinician in the Patient Dashboard.
+7. **Architectural Improvements**:
+   - Reusable `Sidebar` layout component.
+   - Extracted `PatientPriorityDetails` component.
+   - Node.js in-memory REST API with 8 passing automated unit tests.
+
+---
+
+## Safety & Clinical Protocol Boundary
+
+- **Clinical Oversight**: CareBridge AI does **not** provide autonomous medical diagnoses or replace licensed clinical decision-making. Priority classifications are assigned and verified exclusively by qualified clinicians.
+- **Synthetic Data**: All displayed patients, numbers, and test records are demonstrative dummy data.
+- **Privacy & Role Scoping**: Role headers (`x-demo-role`, `x-demo-patient-id`) demonstrate role boundaries for prototyping and must be paired with production JWT/OAuth authentication in deployed environments.
+
+---
+
+## Technology Stack
+
+- **Frontend**: React 18, Vite 6, Tailwind CSS 3, Lucide React icons
+- **Backend**: Node.js HTTP Server (`backend/server.js`), REST endpoints under `/api/phase4/*`
+- **Testing**: Node.js native test runner (`node --test backend/phase4.test.js`)
+
+---
+
+## How to Run the Project
+
+### 1. Unified Launch (Recommended)
+Starts both the backend API (port 5000) and frontend Vite server (port 5173) concurrently:
+```sh
+npm start
+```
+Open **[http://localhost:5173](http://localhost:5173)** in your browser. All `/api` requests are automatically proxied to the backend.
+
+### 2. Manual Terminal Launch
+- **Terminal 1 (Backend API)**:
+  ```sh
+  node backend/server.js
+  ```
+- **Terminal 2 (Frontend Web App)**:
+  ```sh
+  npm run dev
+  ```
+
+### 3. Automated Tests & Build
+- **Run Backend Tests**:
+  ```sh
+  npm test
+  ```
+- **Production Build Check**:
+  ```sh
+  npm run build
+  ```
+
+---
+
+## Project Structure
+
+```text
+src/
+  assets/           Static graphics and brand SVGs
+  components/
+    ui/             Reusable design system components (Button, Card, Input, Modal, etc.)
+    triage/         Phase 2 symptom check-in and staff review queue
+    investigations/ Phase 3 investigation lifecycle and delay tracking
+    priority/       Phase 4 priority queues, details, alerts, and doctor availability
+  layouts/          Navbar, Footer, and Sidebar layouts
+  pages/            LandingPage and role-based DashboardApp
+  services/         API client for Phase 4 endpoints
+  styles/           Tailwind CSS configuration and design tokens
+  i18n/             LanguageContext and Kannada translation dictionary
+  utils/            Theme constants and clinical triage rules
+backend/
+  server.js         HTTP server with reverse-proxy support
+  models/           In-memory priority store, demo records, and wait calculators
+  services/         Business logic, escalation engine, and role validation
+  controllers/      API route controllers
+  routes/           REST router (/api/health, /api/phase4/*)
+  phase4.test.js    Automated test suite (8 tests)
+```
