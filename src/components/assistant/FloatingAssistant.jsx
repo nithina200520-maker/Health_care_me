@@ -14,6 +14,7 @@ import {
   RefreshCw,
   HelpCircle,
   Volume2,
+  Stethoscope,
 } from 'lucide-react';
 import { useLanguage } from '../../i18n/LanguageContext';
 import { sendChatMessage, analyzeMedicalDocument } from '../../services/api';
@@ -30,6 +31,7 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
   const [isLoading, setIsLoading] = useState(false);
   const [isAnalyzingDoc, setIsAnalyzingDoc] = useState(false);
   const [hasUnread, setHasUnread] = useState(true);
+  const [autoVoiceEnabled, setAutoVoiceEnabled] = useState(true);
 
   // Initial welcome message
   const initialGreeting = {
@@ -112,6 +114,8 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
         text: response.reply,
         spokenText: response.spokenText,
         actionSuggestion: response.actionSuggestion,
+        clinicalReferral: response.clinicalReferral,
+        autoPlay: autoVoiceEnabled,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
@@ -138,6 +142,17 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
 
   const handleAnalyzeDocument = async (payload) => {
     setIsAnalyzingDoc(true);
+
+    // Immediately display user upload bubble with image preview thumbnail
+    const userUploadMsg = {
+      id: `user-upload-${Date.now()}`,
+      sender: 'user',
+      text: `Uploaded Doctor's Record / Image: ${payload.fileName}`,
+      imagePreview: payload.fileData,
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setMessages((prev) => [...prev, userUploadMsg]);
+
     try {
       const result = await analyzeMedicalDocument({
         ...payload,
@@ -150,12 +165,13 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
         sender: 'assistant',
         text:
           language === 'kn'
-            ? `ವೈದ್ಯಕೀಯ ದಾಖಲೆ (${payload.fileName}) ವಿಶ್ಲೇಷಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ:`
+            ? `ವೈದ್ಯರ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್ ಮತ್ತು ದಾಖಲೆ (${payload.fileName}) ವಿಶ್ಲೇಷಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ:`
             : language === 'hi'
-            ? `मेडिकल दस्तावेज़ (${payload.fileName}) का विश्लेषण पूरा हुआ:`
-            : `Medical Document (${payload.fileName}) analysis complete:`,
+            ? `डॉक्टर के पर्चे एवं मेडिकल दस्तावेज़ (${payload.fileName}) का विश्लेषण:`
+            : `Doctor's Prescription & Medical Document (${payload.fileName}) Analysis:`,
         spokenText: result.spokenText,
         analysis: result,
+        autoPlay: autoVoiceEnabled,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
       };
 
@@ -260,6 +276,21 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
 
             {/* Language Selector & Controls */}
             <div className="flex items-center gap-1.5">
+              {/* Auto Voice Narration Toggle */}
+              <button
+                type="button"
+                onClick={() => setAutoVoiceEnabled(!autoVoiceEnabled)}
+                title={autoVoiceEnabled ? 'Auto Voice Narration ON (Click to mute)' : 'Auto Voice Narration OFF (Click to enable auto-speech)'}
+                className={`flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold border transition-all ${
+                  autoVoiceEnabled
+                    ? 'bg-cyan-500/20 text-cyan-300 border-cyan-400/60 shadow-sm'
+                    : 'bg-slate-900 text-slate-400 border-slate-700'
+                }`}
+              >
+                <Volume2 className={`w-3 h-3 ${autoVoiceEnabled ? 'text-cyan-400 animate-pulse' : ''}`} />
+                <span className="hidden sm:inline">{autoVoiceEnabled ? 'Voice ON' : 'Muted'}</span>
+              </button>
+
               <div className="flex rounded-md bg-slate-900/90 border border-cyan-800/50 p-0.5 text-[10px]">
                 <button
                   type="button"
@@ -321,7 +352,40 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
                           : 'bg-[#091b33] border border-cyan-800/50 text-slate-200 rounded-tl-none space-y-2'
                       }`}
                     >
+                      {/* Uploaded Image Thumbnail Preview */}
+                      {msg.imagePreview && (
+                        <div className="mb-2.5 max-w-[260px] rounded-xl overflow-hidden border border-cyan-400/50 shadow-lg bg-black/40">
+                          <img
+                            src={msg.imagePreview}
+                            alt="Uploaded Doctor Written Note"
+                            className="w-full max-h-52 object-contain bg-slate-950/70"
+                          />
+                        </div>
+                      )}
+
                       <div className="leading-relaxed whitespace-pre-wrap">{msg.text}</div>
+
+                      {/* Clinical Doctor Referral Card */}
+                      {msg.clinicalReferral && (
+                        <div className="mt-2.5 p-3 rounded-xl bg-gradient-to-r from-cyan-950/90 via-blue-950/80 to-[#071322] border border-cyan-500/50 text-xs space-y-1.5 shadow-md">
+                          <div className="flex items-center justify-between text-cyan-300 font-bold border-b border-cyan-900/40 pb-1.5">
+                            <div className="flex items-center gap-1.5">
+                              <Stethoscope className="w-4 h-4 text-cyan-400" />
+                              <span>{msg.clinicalReferral.category || 'Specialist Consultation'}</span>
+                            </div>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-900/80 text-cyan-300 border border-cyan-600">
+                              {msg.clinicalReferral.priority}
+                            </span>
+                          </div>
+                          <div className="text-slate-100 font-bold text-xs flex items-center gap-1.5">
+                            <span className="text-cyan-400 font-medium">Doctor:</span>
+                            <span>{msg.clinicalReferral.doctor}</span>
+                          </div>
+                          <div className="text-[11px] text-slate-300">
+                            <span className="text-cyan-400 font-medium">Department:</span> {msg.clinicalReferral.department}
+                          </div>
+                        </div>
+                      )}
 
                       {/* Document analysis card if attached */}
                       {msg.analysis && (
@@ -349,7 +413,7 @@ export function FloatingAssistant({ onNavigateSection, currentRole = 'Patient' }
                       {/* Voice controls for spoken reply */}
                       {msg.spokenText && msg.sender === 'assistant' && (
                         <div className="pt-1.5">
-                          <VoiceControls spokenText={msg.spokenText} language={language} compact />
+                          <VoiceControls spokenText={msg.spokenText} language={language} compact autoPlay={msg.autoPlay} />
                         </div>
                       )}
 

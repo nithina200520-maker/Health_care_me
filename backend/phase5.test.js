@@ -122,3 +122,44 @@ test('Phase 5 navigation: delivers hospital department locations and queue count
   assert.ok(result.data.departments.some((dept) => dept.name === 'Emergency Desk'));
   assert.ok(result.data.departments.some((dept) => dept.name === 'Diagnostic Laboratory'));
 });
+
+test('Phase 5 symptom consultation: analyzes symptoms, recommends department and doctor with AI voice', async () => {
+  const resultEn = await api('/api/phase5/chat', {
+    method: 'POST',
+    body: { message: 'I have fever and cough for two days', language: 'en' },
+  });
+  assert.equal(resultEn.status, 200);
+  assert.ok(resultEn.data.reply.includes('Dr. Kavita Menon'));
+  assert.ok(resultEn.data.reply.includes('General Medicine'));
+  assert.ok(resultEn.data.spokenText.includes('Dr. Kavita Menon'));
+  assert.ok(resultEn.data.clinicalReferral !== null);
+  assert.equal(resultEn.data.clinicalReferral.category, 'General Medicine & Infection Care');
+
+  // Kannada test for stomach pain
+  const resultKn = await api('/api/phase5/chat', {
+    method: 'POST',
+    body: { message: 'ನನಗೆ ತೀವ್ರ ಹೊಟ್ಟೆ ನೋವು ಮತ್ತು ವಾಂತಿ ಇದೆ', language: 'kn' },
+  });
+  assert.equal(resultKn.status, 200);
+  assert.ok(resultKn.data.reply.includes('ಡಾ. ನಿಶಾ ರಾವ್') || resultKn.data.reply.includes('ಡಾ. ಕವಿತಾ ಮೆನನ್'));
+  assert.ok(resultKn.data.reply.includes('ಜನರಲ್ ಮೆಡಿಸಿನ್'));
+  assert.ok(resultKn.data.spokenText.length > 0);
+});
+
+test('Phase 5 doctor image analysis: extracts doctor written photo into structured medicines and voice', async () => {
+  const result = await api('/api/phase5/analyze-document', {
+    method: 'POST',
+    body: {
+      fileName: 'doctor_written_prescription_photo.jpg',
+      fileType: 'image/jpeg',
+      fileData: 'data:image/jpeg;base64,demoDoctorHandwriting',
+      language: 'en',
+    },
+  });
+  assert.equal(result.status, 200);
+  assert.ok(result.data.documentType.includes('Handwritten Prescription'));
+  assert.equal(result.data.doctorHeader.doctorName, 'Dr. Kavita Menon, MBBS, MD');
+  assert.ok(result.data.parameters.some((p) => p.name.includes('Augmentin')));
+  assert.ok(result.data.parameters.some((p) => p.name.includes('Dolo')));
+  assert.ok(result.data.spokenText.includes('Augmentin') || result.data.spokenText.includes('Prescription'));
+});

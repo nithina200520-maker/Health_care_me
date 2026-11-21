@@ -1,5 +1,5 @@
 import React from 'react';
-import { FileText, ShieldAlert, CheckCircle2, AlertCircle, HelpCircle, BookOpen, Volume2 } from 'lucide-react';
+import { FileText, ShieldAlert, CheckCircle2, AlertCircle, HelpCircle, BookOpen, Volume2, Stethoscope, UserCheck } from 'lucide-react';
 import { VoiceControls } from './VoiceControls';
 
 export function DocumentAnalysisCard({
@@ -12,6 +12,7 @@ export function DocumentAnalysisCard({
   const {
     documentType,
     fileName,
+    doctorHeader,
     parameters = [],
     summary,
     terminology = [],
@@ -35,9 +36,32 @@ export function DocumentAnalysisCard({
         </div>
 
         {spokenText && (
-          <VoiceControls spokenText={spokenText} language={language} compact />
+          <VoiceControls spokenText={spokenText} language={language} compact autoPlay />
         )}
       </div>
+
+      {/* Doctor & Clinic Header (if prescription/consultation) */}
+      {doctorHeader && (
+        <div className="p-3 rounded-lg bg-gradient-to-r from-cyan-950/70 via-blue-950/50 to-[#091d38] border border-cyan-700/60 space-y-1.5 text-xs">
+          <div className="flex flex-wrap items-center justify-between gap-1">
+            <div className="flex items-center gap-1.5 text-cyan-300 font-bold">
+              <Stethoscope className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>{doctorHeader.doctorName}</span>
+            </div>
+            <span className="text-[10px] text-cyan-300 font-medium px-2 py-0.5 rounded-full bg-cyan-950 border border-cyan-800">
+              {doctorHeader.specialization}
+            </span>
+          </div>
+          <div className="text-[11px] text-slate-300">
+            <span className="text-cyan-400 font-medium">Hospital Unit:</span> {doctorHeader.clinic}
+          </div>
+          {doctorHeader.clinicalNotes && (
+            <div className="text-[11px] text-slate-200 bg-cyan-950/40 p-1.5 rounded border border-cyan-900/50">
+              <span className="text-cyan-300 font-semibold">Doctor's Diagnosis / Notes:</span> {doctorHeader.clinicalNotes}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Extracted Parameters / Findings Table */}
       {parameters.length > 0 && (
