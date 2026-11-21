@@ -3,6 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { resolve } from 'node:path';
 import { createPriorityController } from './controllers/index.js';
 import { createPriorityStore } from './models/index.js';
+import { createUserStore } from './models/userStore.js';
 import { createPriorityRouter } from './routes/index.js';
 import { createPriorityService, ServiceError } from './services/index.js';
 
@@ -30,12 +31,12 @@ function send(response, status, body) {
   response.end(JSON.stringify(body));
 }
 
-export function createCareBridgeServer({ store = createPriorityStore() } = {}) {
+export function createCareBridgeServer({ store = createPriorityStore(), userStore = createUserStore() } = {}) {
   const router = createPriorityRouter(createPriorityController(createPriorityService(store)));
   return createServer(async (request, response) => {
     response.setHeader('access-control-allow-origin', 'http://127.0.0.1:5173');
     response.setHeader('access-control-allow-headers', 'content-type,x-demo-role,x-demo-patient-id');
-    response.setHeader('access-control-allow-methods', 'GET,POST,PATCH,OPTIONS');
+    response.setHeader('access-control-allow-methods', 'GET,POST,PATCH,PUT,DELETE,OPTIONS');
     if (request.method === 'OPTIONS') { response.writeHead(204); response.end(); return; }
 
     const url = new URL(request.url || '/', 'http://127.0.0.1');
@@ -43,6 +44,79 @@ export function createCareBridgeServer({ store = createPriorityStore() } = {}) {
       send(response, 200, { status: 'ok', service: 'CareBridge AI Demo API', version: '0.3.0', phase: 'Phase 4', activePhases: ['Phase 0', 'Phase 1', 'Phase 2', 'Phase 3', 'Phase 4', 'Phase 5'], storage: 'in-memory demo data', timestamp: new Date().toISOString() });
       return;
     }
+
+    // Authentication Routes
+    if (url.pathname === '/api/auth/register' && request.method === 'POST') {
+      try {
+        const body = await readJson(request);
+        const user = userStore.register(body);
+        send(response, 201, { success: true, user, message: 'Registration successful.' });
+      } catch (err) {
+        send(response, 400, { error: err.message });
+      }
+      return;
+    }
+
+    if (url.pathname === '/api/auth/login' && request.method === 'POST') {
+      try {
+        const body = await readJson(request);
+        const user = userStore.login(body);
+        send(response, 200, { success: true, user, message: 'Login successful.' });
+      } catch (err) {
+        send(response, 401, { error: err.message });
+      }
+      return;
+    }
+
+    // Master Admin User Management CRUD Routes
+    if (url.pathname === '/api/admin/users') {
+      if (request.method === 'GET') {
+        const roleFilter = url.searchParams.get('role');
+        const search = url.searchParams.get('search');
+        const users = userStore.getAllUsers({ role: roleFilter, search });
+        send(response, 200, { users, stats: userStore.getStats() });
+        return;
+      }
+      if (request.method === 'POST') {
+        try {
+          const body = await readJson(request);
+          const user = userStore.register(body);
+          send(response, 201, { success: true, user, message: 'Person registered successfully.' });
+        } catch (err) {
+          send(response, 400, { error: err.message });
+        }
+        return;
+      }
+    }
+
+    if (url.pathname.startsWith('/api/admin/users/')) {
+      const id = decodeURIComponent(url.pathname.slice('/api/admin/users/'.length));
+      if (['PATCH', 'PUT'].includes(request.method)) {
+        try {
+          const body = await readJson(request);
+          const updated = userStore.updateUser(id, body);
+          send(response, 200, { success: true, user: updated, message: 'Person updated successfully.' });
+        } catch (err) {
+          send(response, 400, { error: err.message });
+        }
+        return;
+      }
+      if (request.method === 'DELETE') {
+        try {
+          const deleted = userStore.deleteUser(id);
+          send(response, 200, { success: true, deleted, message: 'Person deleted successfully.' });
+        } catch (err) {
+          send(response, 400, { error: err.message });
+        }
+        return;
+      }
+    }
+
+    if (url.pathname === '/api/admin/stats' && request.method === 'GET') {
+      send(response, 200, userStore.getStats());
+      return;
+    }
+
     if (!url.pathname.startsWith('/api/phase4') && !url.pathname.startsWith('/api/phase5')) {
       send(response, 404, { error: 'Route not found.' });
       return;

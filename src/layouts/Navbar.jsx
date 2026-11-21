@@ -4,7 +4,7 @@ import Button from '../components/ui/Button';
 import LanguageSwitcher from '../components/LanguageSwitcher';
 import { useLanguage } from '../i18n/LanguageContext';
 
-export default function Navbar({ onOpenAuth, onOpenGetStarted }) {
+export default function Navbar({ onOpenAuth, onOpenGetStarted, currentUser, onLogout, onOpenDashboard }) {
   const { t } = useLanguage();
   const [isOpen, setIsOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
@@ -88,21 +88,49 @@ export default function Navbar({ onOpenAuth, onOpenGetStarted }) {
           {/* Desktop Action Buttons */}
           <div className="hidden lg:flex items-center gap-3.5">
             <LanguageSwitcher compact />
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={onOpenAuth}
-            >
-              {t('Login')}
-            </Button>
-            <Button
-              variant="primary"
-              size="sm"
-              rightIcon={ArrowRight}
-              onClick={onOpenGetStarted}
-            >
-              {t('Get Started')}
-            </Button>
+            {currentUser ? (
+              <div className="flex items-center gap-3">
+                <button
+                  type="button"
+                  onClick={onOpenDashboard}
+                  className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-[#101F33] hover:bg-[#152740] border border-cyan-500/30 text-xs font-semibold text-white transition-colors"
+                >
+                  <span className="w-6 h-6 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-[10px] font-bold">
+                    {currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CB'}
+                  </span>
+                  <span>{currentUser.name}</span>
+                  <span className="text-[10px] text-cyan-400 px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-800/50">
+                    {currentUser.role}
+                  </span>
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onLogout}
+                  className="text-rose-400 hover:text-rose-300 hover:bg-rose-950/40"
+                >
+                  Log out
+                </Button>
+              </div>
+            ) : (
+              <>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onOpenAuth('login', 'Patient')}
+                >
+                  {t('Login')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="sm"
+                  rightIcon={ArrowRight}
+                  onClick={onOpenGetStarted}
+                >
+                  {t('Get Started')}
+                </Button>
+              </>
+            )}
           </div>
 
           {/* Mobile Hamburger Button */}
@@ -135,29 +163,67 @@ export default function Navbar({ onOpenAuth, onOpenGetStarted }) {
           </nav>
           <div className="flex flex-col gap-3 pt-3 border-t border-white/10">
             <LanguageSwitcher />
-            <Button
-              variant="secondary"
-              size="md"
-              className="w-full justify-center"
-              onClick={() => {
-                setIsOpen(false);
-                onOpenAuth();
-              }}
-            >
-              {t('Login')}
-            </Button>
-            <Button
-              variant="primary"
-              size="md"
-              className="w-full justify-center"
-              rightIcon={ArrowRight}
-              onClick={() => {
-                setIsOpen(false);
-                onOpenGetStarted();
-              }}
-            >
-              {t('Get Started')}
-            </Button>
+            {currentUser ? (
+              <>
+                <div className="flex items-center gap-2 p-3 rounded-xl bg-[#101F33]">
+                  <span className="w-8 h-8 rounded-lg bg-cyan-500/20 text-cyan-400 flex items-center justify-center font-bold text-xs">
+                    {currentUser.name ? currentUser.name.slice(0, 2).toUpperCase() : 'CB'}
+                  </span>
+                  <div>
+                    <p className="text-sm font-semibold text-white">{currentUser.name}</p>
+                    <p className="text-xs text-cyan-400">{currentUser.role}</p>
+                  </div>
+                </div>
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full justify-center"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onOpenDashboard();
+                  }}
+                >
+                  Go to Dashboard
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="md"
+                  className="w-full justify-center text-rose-400"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onLogout();
+                  }}
+                >
+                  Log out
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  variant="secondary"
+                  size="md"
+                  className="w-full justify-center"
+                  onClick={() => {
+                    setIsOpen(false);
+                    onOpenAuth('login', 'Patient');
+                  }}
+                >
+                  {t('Login')}
+                </Button>
+                <Button
+                  variant="primary"
+                  size="md"
+                  className="w-full justify-center"
+                  rightIcon={ArrowRight}
+                  onClick={() => {
+                    setIsOpen(false);
+                    onOpenGetStarted();
+                  }}
+                >
+                  {t('Get Started')}
+                </Button>
+              </>
+            )}
           </div>
         </div>
       )}

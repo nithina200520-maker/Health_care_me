@@ -4,7 +4,7 @@ import {
   Check, CheckCircle2, ChevronDown, ChevronLeft, ChevronRight, ClipboardList, Clock3,
   FileClock, FileText, FlaskConical, HeartPulse, LayoutDashboard, Menu, MessageSquareText,
   PanelLeftClose, PanelLeftOpen, Search, ScanLine, Settings, ShieldAlert,
-  Users, X,
+  Users, X, LogOut,
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import Badge from '../components/ui/Badge';
@@ -18,6 +18,7 @@ import TriageQueue from '../components/triage/TriageQueue';
 import { createDemoTriageCases } from '../utils/triageRules';
 import InvestigationTracking, { createDemoInvestigations } from '../components/investigations/InvestigationTracking';
 import PatientPriorityDashboard from '../components/priority/PatientPriorityDashboard';
+import AdminUserManagement from '../components/admin/AdminUserManagement';
 import Sidebar from '../layouts/Sidebar';
 import { createPriorityCase } from '../services/api';
 
@@ -29,6 +30,7 @@ function CardTitle({ children, ...props }) {
 const ROLES = ['Patient', 'Doctor', 'Hospital Staff', 'Laboratory Staff', 'Radiology Staff', 'Hospital Administrator'];
 const NAV = [
   { label: 'Dashboard', icon: LayoutDashboard, roles: ROLES },
+  { label: 'User Directory & CRUD', icon: Users, roles: ['Hospital Administrator'] },
   { label: 'Symptom Check-In', icon: HeartPulse, roles: ['Patient', 'Hospital Staff'] },
   { label: 'Patient Priority Dashboard', icon: ShieldAlert, roles: ['Patient', 'Doctor', 'Hospital Staff', 'Hospital Administrator'] },
   { label: 'Patient Urgency & Triage Queue', icon: ShieldAlert, roles: ['Doctor', 'Hospital Staff', 'Hospital Administrator'] },
@@ -258,9 +260,13 @@ function NotificationCenter({ notifications, onMarkRead, onMarkAllRead }) {
   return <Card><CardHeader><div className="flex items-center justify-between gap-3"><div><CardTitle>Notification Center</CardTitle><p className="mt-1 text-sm text-text-muted">{t('Local demonstration notifications from this session.')}</p></div><Button size="sm" variant="ghost" onClick={onMarkAllRead}>Mark all read</Button></div></CardHeader><CardContent className="space-y-2 pt-0">{notifications.length ? notifications.map((item) => <button key={item.id} onClick={() => onMarkRead(item.id)} className={`flex w-full items-start gap-3 rounded-xl border p-3 text-left transition-colors ${item.read ? 'border-white/5 bg-transparent' : 'border-cyan-300/10 bg-cyan-300/[0.035]'}`}><span className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${item.read ? 'bg-text-muted/40' : item.severity === 'Immediate Attention' ? 'bg-health-error' : item.severity === 'Urgent Review' ? 'bg-health-warning' : 'bg-accent-cyan'}`} /><span className="min-w-0 flex-1"><span className="flex flex-wrap items-center gap-2"><span className="text-sm font-medium text-white">{t(item.title)}</span><Badge variant={tone(item.severity)} size="sm">{item.severity}</Badge></span><span className="mt-1 block text-xs text-text-secondary">{t('Patient ID')}: {item.patientId}</span><span className="mt-1 block text-xs text-text-muted">{new Date(item.time).toLocaleString(language === 'kn' ? 'kn-IN' : 'en-IN')}</span></span><span className="text-xs text-text-muted">{t(item.read ? 'Read' : 'Unread')}</span></button>) : <p className="py-8 text-center text-sm text-text-muted">{t('No symptom check-in notifications in this session.')}</p>}</CardContent></Card>;
 }
 
-export default function DashboardApp({ onExitDemo, initialSection }) {
-  const [role, setRole] = useState('Patient');
-  const [section, setSection] = useState(initialSection || 'Dashboard');
+export default function DashboardApp({ onExitDemo, initialSection, currentUser, onLogout }) {
+  const [role, setRole] = useState(currentUser?.role || 'Patient');
+  const [section, setSection] = useState(initialSection || (currentUser?.role === 'Hospital Administrator' ? 'User Directory & CRUD' : 'Dashboard'));
+
+  React.useEffect(() => {
+    if (currentUser?.role) setRole(currentUser.role);
+  }, [currentUser]);
 
   React.useEffect(() => {
     if (initialSection) setSection(initialSection);
@@ -305,8 +311,16 @@ export default function DashboardApp({ onExitDemo, initialSection }) {
   const unreadNotificationCount = demoNotifications.filter((item) => !item.read).length;
   const changeRole = (next) => { setRole(next); setSection('Dashboard'); setRoleOpen(false); setSearch(''); };
   const activeSection = visibleNav.some((item) => item.label === section) ? section : 'Dashboard';
-  const greeting = role === 'Patient' ? 'Good morning, Ananya' : `Good morning, ${role === 'Doctor' ? 'Dr. Kavita Menon' : role}`;
-  const intro = role === 'Patient' ? 'Here is an update on your care journey.' : `A current overview for the ${role.toLowerCase()} team.`;
+  const greeting = currentUser
+    ? `Welcome, ${currentUser.name}`
+    : role === 'Patient'
+    ? 'Good morning, Ananya'
+    : `Good morning, ${role === 'Doctor' ? 'Dr. Kavita Menon' : role}`;
+  const intro = role === 'Hospital Administrator'
+    ? 'Hospital Administrative Directory & Master CRUD Governance.'
+    : role === 'Patient'
+    ? 'Here is an update on your care journey.'
+    : `A current overview for the ${role.toLowerCase()} team.`;
   const dashboardInvestigations = role === 'Laboratory Staff' ? investigations.filter((item) => item.department === 'Laboratory') : role === 'Radiology Staff' ? investigations.filter((item) => item.department === 'Radiology') : investigations;
   const delayedInvestigations = dashboardInvestigations.filter((item) => !['Doctor Reviewed', 'Cancelled'].includes(item.status) && new Date(item.expectedAt).getTime() < Date.now()).length;
   const reportsAwaitingFollowup = dashboardInvestigations.filter((item) => ['Report Pending', 'Verification Pending'].includes(item.status)).length;
@@ -333,19 +347,32 @@ export default function DashboardApp({ onExitDemo, initialSection }) {
         <div className="relative hidden max-w-md flex-1 sm:block"><Search size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('Search this dashboard...')} className="h-10 w-full rounded-xl border border-white/5 bg-[#101F33] pl-10 pr-4 text-sm text-white outline-none placeholder:text-text-muted focus:border-cyan-300/30" /></div>
         <div className="ml-auto flex items-center gap-2 sm:gap-3"><span className="hidden text-xs text-text-muted md:block">{t('Demo role')}</span><div className="relative"><button onClick={() => setRoleOpen(!roleOpen)} className="flex h-10 items-center gap-2 rounded-xl border border-white/10 bg-[#101F33] px-3 text-xs font-medium text-white hover:border-cyan-300/25"><span className="grid h-6 w-6 place-items-center rounded-lg bg-cyan-300/10 text-accent-cyan"><Users size={13} /></span><span className="hidden sm:inline">{t(role)}</span><ChevronDown size={14} className="text-text-muted" /></button>{roleOpen && <div className="absolute right-0 top-12 z-50 w-60 rounded-xl border border-white/10 bg-[#101F33] p-2 shadow-card">{ROLES.map((r) => <button key={r} onClick={() => changeRole(r)} className={`flex w-full items-center justify-between rounded-lg px-3 py-2.5 text-left text-sm ${r === role ? 'bg-cyan-300/10 text-accent-cyan' : 'text-text-secondary hover:bg-white/5 hover:text-white'}`}>{t(r)}{r === role && <Check size={15} />}</button>)}</div>}</div><LanguageSwitcher compact />
           <div className="relative"><button onClick={() => setNotificationsOpen(!notificationsOpen)} aria-label={t('Notifications')} className="relative grid h-10 w-10 place-items-center rounded-xl border border-white/5 text-text-secondary hover:bg-white/5 hover:text-white"><Bell size={18} />{unreadNotificationCount > 0 && <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-health-warning ring-2 ring-[#07111F]" />}</button>{notificationsOpen && <div className="absolute right-0 top-12 z-50 w-[min(340px,calc(100vw-2rem))] rounded-xl border border-white/10 bg-[#101F33] p-4 shadow-card"><div className="mb-3 flex items-center justify-between"><p className="font-semibold text-white">{t('Notifications')}</p><button onClick={() => setNotificationsOpen(false)} className="text-text-muted hover:text-white" aria-label={t('Close')}><X size={16} /></button></div>{demoNotifications.length ? <div className="space-y-2">{demoNotifications.slice(0, 4).map((item) => <button key={item.id} onClick={() => { markNotificationRead(item.id); setSection('Notifications'); setNotificationsOpen(false); }} className="block w-full rounded-lg border-t border-white/5 py-2 text-left"><span className="block text-sm text-white">{t(item.title)}</span><span className="mt-1 block text-xs text-text-muted">{item.patientId} · {new Date(item.time).toLocaleTimeString(language === 'kn' ? 'kn-IN' : 'en-IN', { hour: 'numeric', minute: '2-digit' })}</span></button>)}</div> : <p className="py-3 text-sm text-text-secondary">{t('No new symptom check-in notifications.')}</p>}<button onClick={() => { setSection('Notifications'); setNotificationsOpen(false); }} className="mt-2 text-xs font-medium text-accent-cyan hover:text-white">{t('Open notification center')}</button></div>}</div>
-          <button onClick={() => notify('Demo profile only; account controls are not active.')} className="flex items-center gap-2 rounded-xl p-1.5 pr-2 hover:bg-white/5" title="Demo profile"><span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-cyan-400/25 to-blue-500/25 text-xs font-semibold text-accent-cyan">{role === 'Patient' ? 'AR' : role === 'Doctor' ? 'KM' : 'CB'}</span><span className="hidden text-left md:block"><span className="block text-xs font-medium text-white">{role === 'Patient' ? 'Ananya Rao' : role === 'Doctor' ? 'Dr. Kavita Menon' : 'Demo User'}</span><span className="block text-[10px] text-text-muted">{role}</span></span></button>
+          <button onClick={() => notify('User profile is active.')} className="flex items-center gap-2 rounded-xl p-1.5 pr-2 hover:bg-white/5" title="User profile"><span className="grid h-8 w-8 place-items-center rounded-full bg-gradient-to-br from-cyan-400/25 to-blue-500/25 text-xs font-semibold text-accent-cyan">{currentUser?.name ? currentUser.name.slice(0, 2).toUpperCase() : role === 'Patient' ? 'AR' : role === 'Doctor' ? 'KM' : 'CB'}</span><span className="hidden text-left md:block"><span className="block text-xs font-medium text-white">{currentUser?.name || (role === 'Patient' ? 'Ananya Rao' : role === 'Doctor' ? 'Dr. Kavita Menon' : 'Demo User')}</span><span className="block text-[10px] text-text-muted">{currentUser?.role || role}</span></span></button>
+          {onLogout && (
+            <button
+              type="button"
+              onClick={onLogout}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-800/50 text-xs font-semibold transition-colors"
+              title="Log out"
+            >
+              <LogOut size={13} />
+              <span className="hidden sm:inline">Log out</span>
+            </button>
+          )}
         </div>
       </header>
       <main className="mx-auto max-w-[1600px] px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
         <div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-end"><div><div className="mb-2 flex items-center gap-2"><Badge variant="cyan" size="sm">{t(role)} · {t('workspace')}</Badge><span className="text-xs text-text-muted">{new Date(2026, 10, 21).toLocaleDateString(language === 'kn' ? 'kn-IN' : 'en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}</span></div><h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">{activeSection === 'Dashboard' ? t(greeting) : t(activeSection)}</h1><p className="mt-1 text-sm text-text-secondary">{t(intro)}</p></div><div className="flex gap-2"><Button variant="secondary" size="sm" onClick={onExitDemo}><ChevronLeft size={15} /> {t('Back to home')}</Button>{role !== 'Patient' && <Button size="sm" onClick={() => notify('This action is a visual demo only.')}>{t('Quick action')} <ArrowRight size={14} /></Button>}</div></div>
         <div className="mb-4 sm:hidden"><div className="relative"><Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" /><input value={search} onChange={(e) => setSearch(e.target.value)} placeholder={t('Search this dashboard...')} className="h-10 w-full rounded-xl border border-white/5 bg-[#101F33] pl-10 pr-4 text-sm text-white outline-none placeholder:text-text-muted focus:border-cyan-300/30" /></div></div>
-        {activeSection === 'Dashboard' && role !== 'Patient' && <Card className="mb-5 border-cyan-300/10"><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cyan-300/10 text-accent-cyan"><ClipboardList size={18} /></span><div className="flex-1"><p className="text-sm font-semibold text-white">{t('Investigation coordination')}</p><p className="mt-1 text-xs text-text-secondary">{delayedInvestigations} {t('past expected completion')} <span className="mx-1">·</span> {reportsAwaitingFollowup} {t('reports needing follow-up')}</p></div><Button size="sm" variant="secondary" onClick={() => setSection('Investigation Tracking')}>{t('Open investigation tracking')} <ArrowRight size={14} /></Button></CardContent></Card>}
-        {activeSection === 'Dashboard' && role === 'Patient' ? <PatientDashboard search={search} onAction={notify} latestCheckIn={latestPatientCheckIn} onGoCheckIn={() => setSection('Symptom Check-In')} onGoPriority={() => setSection('Patient Priority Dashboard')} investigations={investigations} />
+        {activeSection === 'Dashboard' && role !== 'Patient' && role !== 'Hospital Administrator' && <Card className="mb-5 border-cyan-300/10"><CardContent className="flex flex-col gap-3 p-4 sm:flex-row sm:items-center"><span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-cyan-300/10 text-accent-cyan"><ClipboardList size={18} /></span><div className="flex-1"><p className="text-sm font-semibold text-white">{t('Investigation coordination')}</p><p className="mt-1 text-xs text-text-secondary">{delayedInvestigations} {t('past expected completion')} <span className="mx-1">·</span> {reportsAwaitingFollowup} {t('reports needing follow-up')}</p></div><Button size="sm" variant="secondary" onClick={() => setSection('Investigation Tracking')}>{t('Open investigation tracking')} <ArrowRight size={14} /></Button></CardContent></Card>}
+        {activeSection === 'User Directory & CRUD' ? <AdminUserManagement />
+          : activeSection === 'Dashboard' && role === 'Hospital Administrator' ? <AdminUserManagement />
+          : activeSection === 'Dashboard' && role === 'Patient' ? <PatientDashboard search={search} onAction={notify} latestCheckIn={latestPatientCheckIn} onGoCheckIn={() => setSection('Symptom Check-In')} onGoPriority={() => setSection('Patient Priority Dashboard')} investigations={investigations} />
           : activeSection === 'Dashboard' && role === 'Doctor' ? <DoctorDashboard search={search} onAction={notify} />
             : activeSection === 'Dashboard' ? <DepartmentDashboard role={role} search={search} onAction={notify} />
               : activeSection === 'Patient Priority Dashboard' ? <PatientPriorityDashboard role={role} search={search} onNotify={notify} />
               : activeSection === 'Patient Urgency & Triage Queue' ? <TriageQueue cases={triageCases} search={search} onUpdateCase={updateTriageCase} onNotify={staffNotify} />
-                : activeSection === 'Symptom Check-In' ? <SymptomCheckIn onSubmit={handleSymptomSubmit} latestCheckIn={role === 'Patient' ? latestPatientCheckIn : null} defaults={role === 'Patient' ? { patientId: 'CB-2050', patientName: 'Ananya Rao', age: 29, gender: 'Female' } : {}} />
+                : activeSection === 'Symptom Check-In' ? <SymptomCheckIn onSubmit={handleSymptomSubmit} latestCheckIn={role === 'Patient' ? latestPatientCheckIn : null} defaults={role === 'Patient' ? { patientId: currentUser?.id || 'CB-2050', patientName: currentUser?.name || 'Ananya Rao', age: currentUser?.age || 29, gender: currentUser?.gender || 'Female' } : {}} />
                   : activeSection === 'Notifications' ? <NotificationCenter notifications={demoNotifications} onMarkRead={markNotificationRead} onMarkAllRead={markAllNotificationsRead} />
                     : <GenericSection section={activeSection} role={role} search={search} onAction={notify} investigations={investigations} onStatusChange={updateInvestigationStatus} />}
         <p className="mt-8 border-t border-white/5 pt-4 text-center text-xs text-text-muted">CareBridge AI Phase 5 UI demo · {t('Sample data only')} · {t('Not for clinical use')}</p>

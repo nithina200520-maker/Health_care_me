@@ -68,7 +68,31 @@ CareBridge AI is a patient-centric healthcare workflow coordination platform des
    - Direct patient assistance for checking doctor availability, lab investigation tracking status, and CT/MRI schedule milestones.
 6. **Backend & Test Suite**:
    - REST endpoints: `POST /api/phase5/chat`, `POST /api/phase5/analyze-document`, `GET /api/phase5/navigation`.
-   - 15 total unit tests passing across Phase 4 and Phase 5 (`npm test`).
+   - Automated test suite passing across all modules.
+
+### Phase 6 — Multi-Role Authentication Portals & Master Admin CRUD Governance (Completed)
+1. **Patient Registration & Login Portal**:
+   - Dedicated Patient Portal with self-registration (Name, Email, Password, Phone, Age, Gender, Medical History).
+   - Secure login with session tracking, auto-redirecting patients to their personal healthcare coordination workspace.
+2. **Doctor Registration & Login Portal**:
+   - Dedicated Doctor Portal with Medical Council License verification (e.g. `KMC-48291`), Clinical Department assignment, Specialization, and Shift.
+   - Clinician login routing directly to the Doctor Consultation Queue and Clinical Priority Assessment engine.
+3. **Master Hospital Administrator Control Dashboard (Full CRUD)**:
+   - **CREATE**: Register and onboard new Patients, Doctors, and Hospital Personnel directly.
+   - **READ / SEE**: Comprehensive directory of all registered persons with real-time search, role filtering (`All`, `Patient`, `Doctor`, `Staff`, `Admin`), and status indicators.
+   - **UPDATE / EDIT**: Edit any registered person's Name, Email, Phone, Role, Department, License, Specialization, Shift, and Account Status (`Active`, `Suspended`, `On Leave`).
+   - **DELETE**: Permanently remove registered users from the hospital system with confirmation safety guards.
+   - **System Governance**: Real-time statistics across total users, registered patients, licensed doctors, care coordinators, and active accounts.
+4. **Backend REST Endpoints**:
+   - `POST /api/auth/register` (Multi-role account registration)
+   - `POST /api/auth/login` (Credential validation & session retrieval)
+   - `GET /api/admin/users` (List all registered persons with search & filter)
+   - `POST /api/admin/users` (Admin Create person)
+   - `PATCH /api/admin/users/:id` (Admin Update person)
+   - `DELETE /api/admin/users/:id` (Admin Delete person)
+   - `GET /api/admin/stats` (Admin system metrics)
+5. **Testing**:
+   - 21 total passing unit tests across Phase 4, Phase 5, Authentication, and Admin CRUD (`npm test`).
 
 ---
 
@@ -83,8 +107,8 @@ CareBridge AI is a patient-centric healthcare workflow coordination platform des
 ## Technology Stack
 
 - **Frontend**: React 18, Vite 6, Tailwind CSS 3, Lucide React icons
-- **Backend**: Node.js HTTP Server (`backend/server.js`), REST endpoints under `/api/phase4/*` and `/api/phase5/*`
-- **Testing**: Node.js native test runner (`node --test backend/phase4.test.js backend/phase5.test.js`) — 15 passing tests
+- **Backend**: Node.js HTTP Server (`backend/server.js`), REST endpoints under `/api/auth/*`, `/api/admin/*`, `/api/phase4/*` and `/api/phase5/*`
+- **Testing**: Node.js native test runner (`node --test backend/phase4.test.js backend/phase5.test.js backend/auth_admin.test.js`) — 21 passing tests
 
 ---
 
@@ -108,7 +132,7 @@ Open **[http://localhost:5173](http://localhost:5173)** in your browser. All `/a
   ```
 
 ### 3. Automated Tests & Build
-- **Run Backend Tests (15 tests)**:
+- **Run Backend Tests (21 tests)**:
   ```sh
   npm test
   ```
@@ -126,22 +150,26 @@ src/
   assets/           Static graphics and brand SVGs
   components/
     ui/             Reusable design system components (Button, Card, Input, Modal, etc.)
+    admin/          Phase 6 Master Admin User Management (full CRUD controls)
     triage/         Phase 2 symptom check-in and staff review queue
     investigations/ Phase 3 investigation lifecycle and delay tracking
     priority/       Phase 4 priority queues, details, alerts, and doctor availability
     assistant/      Phase 5 FloatingAssistant, VoiceControls, ImageUploadZone, DocumentAnalysisCard
+    AuthModal.jsx   Multi-portal Registration & Login (Patient, Doctor, Admin)
   layouts/          Navbar, Footer, and Sidebar layouts
-  pages/            LandingPage and role-based DashboardApp
-  services/         API client for Phase 4 & Phase 5 endpoints
+  pages/            LandingPage (with dedicated portal slides) and DashboardApp
+  services/         API client for Auth, Admin CRUD, Phase 4 & Phase 5 endpoints
   styles/           Tailwind CSS configuration and design tokens
   i18n/             LanguageContext, English, Kannada, and Hindi translation dictionaries
   utils/            Theme constants and clinical triage rules
 backend/
-  server.js         HTTP server with reverse-proxy support (Phase 4 & Phase 5)
-  models/           In-memory priority store, demo records, and wait calculators
+  server.js         HTTP server with reverse-proxy support (Auth, Admin CRUD, Phase 4 & Phase 5)
+  models/           userStore (in-memory user CRUD), priorityStore, demo records
   services/         Business logic, escalation engine, assistant service, and role validation
   controllers/      API route controllers (Priority & AI Assistant)
-  routes/           REST router (/api/health, /api/phase4/*, /api/phase5/*)
+  routes/           REST router (/api/health, /api/auth/*, /api/admin/*, /api/phase4/*, /api/phase5/*)
   phase4.test.js    Automated test suite for Phase 4 (8 tests)
   phase5.test.js    Automated test suite for Phase 5 (7 tests)
+  auth_admin.test.js Automated test suite for Auth & Admin CRUD (6 tests)
+```
 ```

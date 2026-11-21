@@ -43,3 +43,31 @@ export const analyzeMedicalDocument = ({ fileData, fileName, fileType, language 
 
 export const getHospitalNavigation = (language = 'en') =>
   request(`/phase5/navigation?lang=${encodeURIComponent(language)}`);
+
+// Authentication & Registration API
+export const registerUser = (userData) =>
+  request('/auth/register', { method: 'POST', body: jsonBody(userData) });
+
+export const loginUser = (credentials) =>
+  request('/auth/login', { method: 'POST', body: jsonBody(credentials) });
+
+// Master Administrator User Management CRUD API
+export const getAdminUsers = ({ role, search } = {}) => {
+  const params = new URLSearchParams();
+  if (role && role !== 'All') params.set('role', role);
+  if (search) params.set('search', search);
+  const q = params.toString() ? `?${params.toString()}` : '';
+  return request(`/admin/users${q}`, { role: 'Hospital Administrator' });
+};
+
+export const createAdminUser = (userData) =>
+  request('/admin/users', { role: 'Hospital Administrator', method: 'POST', body: jsonBody(userData) });
+
+export const updateAdminUser = (id, updates) =>
+  request(`/admin/users/${encodeURIComponent(id)}`, { role: 'Hospital Administrator', method: 'PATCH', body: jsonBody(updates) });
+
+export const deleteAdminUser = (id) =>
+  request(`/admin/users/${encodeURIComponent(id)}`, { role: 'Hospital Administrator', method: 'DELETE' });
+
+export const getAdminStats = () =>
+  request('/admin/stats', { role: 'Hospital Administrator' });
