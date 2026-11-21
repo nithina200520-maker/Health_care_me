@@ -40,7 +40,18 @@ export default function AuthModal({
   if (!isOpen) return null;
 
   const handleChange = (e) => {
-    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+    const { name, value } = e.target;
+    let sanitizedValue = value;
+    if (name === 'age') {
+      // Prevent negative signs, decimals, or non-digit characters
+      sanitizedValue = sanitizedValue.replace(/[^0-9]/g, '');
+      if (sanitizedValue !== '') {
+        const num = parseInt(sanitizedValue, 10);
+        if (num > 125) sanitizedValue = '125';
+        else sanitizedValue = String(num);
+      }
+    }
+    setFormData((prev) => ({ ...prev, [name]: sanitizedValue }));
     setError(null);
   };
 
@@ -69,6 +80,12 @@ export default function AuthModal({
         }
         if (activeTab === 'Doctor' && !formData.licenseNumber.trim()) {
           throw new Error('Medical License or Registration Number is required for doctors.');
+        }
+        if (activeTab === 'Patient' && formData.age) {
+          const numAge = Number(formData.age);
+          if (isNaN(numAge) || numAge <= 0 || numAge > 125) {
+            throw new Error('Age must be a valid positive number between 1 and 125.');
+          }
         }
 
         const payload = {
@@ -351,8 +368,15 @@ export default function AuthModal({
                     <input
                       type="number"
                       name="age"
+                      min="1"
+                      max="125"
                       value={formData.age}
                       onChange={handleChange}
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
                       placeholder="e.g. 29"
                       className="w-full p-2.5 rounded-xl bg-[#09182d] border border-cyan-800/50 text-white placeholder-slate-500 focus:outline-none focus:border-cyan-400"
                     />

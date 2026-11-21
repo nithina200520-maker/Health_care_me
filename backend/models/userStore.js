@@ -163,6 +163,13 @@ export function createUserStore() {
         throw new Error('A user with this email address is already registered.');
       }
 
+      if (userData.age !== undefined && userData.age !== null && userData.age !== '') {
+        const parsedAge = Number(userData.age);
+        if (isNaN(parsedAge) || parsedAge <= 0 || parsedAge > 125) {
+          throw new Error('Age must be a valid positive number between 1 and 125.');
+        }
+      }
+
       const rolePrefix =
         userData.role === 'Doctor'
           ? 'DR'
@@ -207,6 +214,13 @@ export function createUserStore() {
       const index = users.findIndex((u) => u.id === id);
       if (index === -1) {
         throw new Error('User not found.');
+      }
+
+      if (updates.age !== undefined && updates.age !== null && updates.age !== '') {
+        const parsedAge = Number(updates.age);
+        if (isNaN(parsedAge) || parsedAge <= 0 || parsedAge > 125) {
+          throw new Error('Age must be a valid positive number between 1 and 125.');
+        }
       }
 
       // If email is changing, verify uniqueness

@@ -59,6 +59,21 @@ test('Auth: prevents duplicate email registration', async () => {
   assert.ok(result.data.error.includes('already registered'));
 });
 
+test('Auth: rejects registration with negative or invalid age', async () => {
+  const result = await api('/api/auth/register', {
+    method: 'POST',
+    body: {
+      name: 'Invalid Age Patient',
+      email: 'invalid.age@carebridge.ai',
+      password: 'password123',
+      role: 'Patient',
+      age: -22,
+    },
+  });
+  assert.equal(result.status, 400);
+  assert.ok(result.data.error.includes('positive number between 1 and 125'));
+});
+
 test('Auth: authenticates patient and doctor login with valid credentials', async () => {
   const patientRes = await api('/api/auth/login', {
     method: 'POST',

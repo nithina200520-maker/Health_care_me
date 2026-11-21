@@ -83,7 +83,7 @@ export default function SymptomCheckIn({ onSubmit, latestCheckIn, defaults = {},
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             <Field label="Patient ID"><input required maxLength={24} value={form.patientId} onChange={(e) => update('patientId', e.target.value)} placeholder={t('e.g. CB-2048')} className="form-control" /></Field>
             <Field label="Patient name"><input required value={form.patientName} onChange={(e) => update('patientName', e.target.value)} placeholder={t('Full name')} className="form-control" /></Field>
-            <Field label="Age"><input required type="number" min="0" max="120" value={form.age} onChange={(e) => update('age', e.target.value)} placeholder={t('Age')} className="form-control" /></Field>
+            <Field label="Age"><input required type="number" min="1" max="125" value={form.age} onKeyDown={(e) => { if (['-', '+', 'e', 'E', '.'].includes(e.key)) e.preventDefault(); }} onChange={(e) => { let val = e.target.value.replace(/[^0-9]/g, ''); if (val !== '') { const n = parseInt(val, 10); if (n > 125) val = '125'; else val = String(n); } update('age', val); }} placeholder={t('Age')} className="form-control" /></Field>
             <Field label="Gender"><select required value={form.gender} onChange={(e) => update('gender', e.target.value)} className="form-control"><option value="">{t('Select')}</option><option value="Female">{t('Female')}</option><option value="Male">{t('Male')}</option><option value="Non-binary">{t('Non-binary')}</option><option value="Prefer not to say">{t('Prefer not to say')}</option></select></Field>
           </div>
 

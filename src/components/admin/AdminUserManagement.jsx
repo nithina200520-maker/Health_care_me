@@ -110,6 +110,13 @@ export default function AdminUserManagement() {
       setError('Name and Email are required.');
       return;
     }
+    if (formData.role === 'Patient' && formData.age) {
+      const num = Number(formData.age);
+      if (isNaN(num) || num <= 0 || num > 125) {
+        setError('Patient age must be a positive number between 1 and 125.');
+        return;
+      }
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -127,6 +134,13 @@ export default function AdminUserManagement() {
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!selectedUser) return;
+    if (formData.role === 'Patient' && formData.age) {
+      const num = Number(formData.age);
+      if (isNaN(num) || num <= 0 || num > 125) {
+        setError('Patient age must be a positive number between 1 and 125.');
+        return;
+      }
+    }
     setIsLoading(true);
     setError(null);
     try {
@@ -570,11 +584,26 @@ export default function AdminUserManagement() {
               {formData.role === 'Patient' && (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/40">
                   <div>
-                    <label className="block text-[11px] font-semibold text-cyan-300 mb-1">Age</label>
+                    <label className="block text-[11px] font-semibold text-cyan-300 mb-1">Age (1–125)</label>
                     <input
                       type="number"
+                      min="1"
+                      max="125"
                       value={formData.age}
-                      onChange={(e) => setFormData({ ...formData, age: e.target.value })}
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^0-9]/g, '');
+                        if (val !== '') {
+                          const n = parseInt(val, 10);
+                          if (n > 125) val = '125';
+                          else val = String(n);
+                        }
+                        setFormData({ ...formData, age: val });
+                      }}
                       placeholder="e.g. 32"
                       className="w-full p-2.5 rounded-lg bg-[#0a1b32] border border-cyan-700/50 text-white focus:outline-none focus:border-cyan-400"
                     />
@@ -720,6 +749,49 @@ export default function AdminUserManagement() {
                   />
                 </div>
               </div>
+
+              {/* Conditional Patient Fields for Edit */}
+              {formData.role === 'Patient' && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-3 rounded-xl bg-cyan-950/30 border border-cyan-800/40">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-cyan-300 mb-1">Age (1–125)</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="125"
+                      value={formData.age}
+                      onKeyDown={(e) => {
+                        if (['-', '+', 'e', 'E', '.'].includes(e.key)) {
+                          e.preventDefault();
+                        }
+                      }}
+                      onChange={(e) => {
+                        let val = e.target.value.replace(/[^0-9]/g, '');
+                        if (val !== '') {
+                          const n = parseInt(val, 10);
+                          if (n > 125) val = '125';
+                          else val = String(n);
+                        }
+                        setFormData({ ...formData, age: val });
+                      }}
+                      placeholder="e.g. 32"
+                      className="w-full p-2.5 rounded-lg bg-[#0a1b32] border border-cyan-700/50 text-white focus:outline-none focus:border-cyan-400"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-cyan-300 mb-1">Gender</label>
+                    <select
+                      value={formData.gender}
+                      onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
+                      className="w-full p-2.5 rounded-lg bg-[#0a1b32] border border-cyan-700/50 text-white focus:outline-none focus:border-cyan-400"
+                    >
+                      <option value="Female">Female</option>
+                      <option value="Male">Male</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-2 pt-3 border-t border-cyan-900/40">
                 <button
